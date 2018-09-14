@@ -9,9 +9,9 @@ object GenericSelectorSpec {
 
   final case class Wrapper[T](value: T)
 
-  def extractGeneric[T <: HList, V](t: T)(
-      implicit select: GenericSelector[Wrapper, T, V]): Wrapper[V] = {
-    select.apply(t)
+  def extractWrapper[T <: HList, V](t: T)(
+      implicit gs: GenericSelector[Wrapper, T, V]): Wrapper[V] = {
+    gs(t)
   }
 
 }
@@ -22,14 +22,14 @@ final class GenericSelectorSpec extends FreeSpec {
 
     "Extracts head" in {
       val wrapper = Wrapper("Hello")
-      val directlyInferredResult = extractGeneric(wrapper :: HNil)
+      val directlyInferredResult = extractWrapper(wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
 
     "Extracts it as a second item" in {
       val wrapper = Wrapper("Hello")
-      val directlyInferredResult = extractGeneric(1 :: wrapper :: HNil)
+      val directlyInferredResult = extractWrapper(1 :: wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
@@ -37,7 +37,7 @@ final class GenericSelectorSpec extends FreeSpec {
     "Extracts it as a third item" in {
       val wrapper = Wrapper("Hello")
       val directlyInferredResult =
-        extractGeneric(1 :: "Test" :: wrapper :: HNil)
+        extractWrapper(1 :: "Test" :: wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
@@ -45,7 +45,7 @@ final class GenericSelectorSpec extends FreeSpec {
     "Extracts it as a fourth item" in {
       val wrapper = Wrapper("Hello")
       val directlyInferredResult =
-        extractGeneric(
+        extractWrapper(
           1 :: "Test" :: Option(2) :: wrapper :: "something" :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)

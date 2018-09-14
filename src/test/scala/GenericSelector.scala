@@ -17,14 +17,14 @@ final class GenericSelector[M[_]] {
     implicit def select[H, T <: HList]: Aux[M[H] :: T, H] =
       new Aux[M[H] :: T, H] {
         def apply(l: M[H] :: T): M[H] = l.head
+
       }
 
-    implicit def recurse[H, T <: HList, U](
-        implicit extractNext: Aux[M[U] :: T, U]): Aux[H :: M[U] :: T, U] =
-      new Aux[H :: M[U] :: T, U] {
-        override def apply(t: H :: M[U] :: T): M[U] =
+    implicit def recurse[HH, H, T <: HList, U](
+        implicit extractNext: Aux[H :: T, U]): Aux[HH :: H :: T, U] =
+      new Aux[HH :: H :: T, U] {
+        override def apply(t: HH :: H :: T): M[U] =
           extractNext.apply(t.tail)
       }
-
   }
 }

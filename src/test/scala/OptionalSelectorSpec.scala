@@ -1,12 +1,11 @@
-import Magnificent2Spec._
+import OptionalSelectorSpec._
 import org.scalatest._
 import shapeless._
 import shapeless.ops.hlist._
 
 import syntax.std.tuple._
 
-
-object Magnificent2Spec {
+object OptionalSelectorSpec {
 
   final case class Title(title: String)
 
@@ -18,10 +17,10 @@ object Magnificent2Spec {
                                        jsonLink: Option[String],
                                        stringContent: String)
 
-
-  def buildParameters[T <: HList](t: T)(implicit titleSelector: Selector[T, Title],
-                                        contentSelector: Selector[T, Content],
-                                        optionalJsonLinkSelector: OptionalSelector[T, JsonLink],
+  def buildParameters[T <: HList](t: T)(
+      implicit titleSelector: Selector[T, Title],
+      contentSelector: Selector[T, Content],
+      optionalJsonLinkSelector: OptionalSelector[T, JsonLink],
   ): RenderingParameters = {
     RenderingParameters(
       title = t.select[Title].title,
@@ -31,18 +30,20 @@ object Magnificent2Spec {
   }
 }
 
-final class Magnificent2Spec extends FreeSpec {
+final class OptionalSelectorSpec extends FreeSpec {
   "rendered" - {
     "Renders with JSON link" in {
-      val input = Title("Hello") :: JsonLink("/some.json") :: Content("This is our result") :: HNil
-      val expectedParameters = RenderingParameters("Hello", Some("/some.json"), "This is our result")
+      val input = Title("Hello") :: JsonLink("/some.json") :: Content(
+        "This is our result") :: HNil
+      val expectedParameters =
+        RenderingParameters("Hello", Some("/some.json"), "This is our result")
       assert(buildParameters(input) == expectedParameters)
     }
     "Renders without JSON link" in {
       val input = Title("Hello") :: Content("This is our result") :: HNil
-      val expectedParameters = RenderingParameters("Hello", None, "This is our result")
+      val expectedParameters =
+        RenderingParameters("Hello", None, "This is our result")
       assert(buildParameters(input) == expectedParameters)
     }
   }
 }
-

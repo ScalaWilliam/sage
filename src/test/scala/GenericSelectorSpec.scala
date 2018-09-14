@@ -1,22 +1,22 @@
-import Magnificent3Spec._
+import GenericSelectorSpec._
 import org.scalatest._
 import shapeless._
 import shapeless.syntax.std.tuple._
 
 import scala.language.higherKinds
 
-object Magnificent3Spec {
+object GenericSelectorSpec {
 
   final case class Wrapper[T](value: T)
 
-  def extractGeneric[M[_], T <: HList, V](t: T)(
-      implicit select: GenericSelector[M, T, V]): M[V] = {
+  def extractGeneric[T <: HList, V](t: T)(
+      implicit select: GenericSelector[Wrapper, T, V]): Wrapper[V] = {
     select.apply(t)
   }
 
 }
 
-final class Magnificent3Spec extends FreeSpec {
+final class GenericSelectorSpec extends FreeSpec {
 
   "GenericSelector" - {
 
@@ -46,7 +46,7 @@ final class Magnificent3Spec extends FreeSpec {
       val wrapper = Wrapper("Hello")
       val directlyInferredResult =
         extractGeneric(
-          1 :: "Test" :: 2.toFloat :: wrapper :: "something" :: HNil)
+          1 :: "Test" :: Option(2) :: wrapper :: "something" :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }

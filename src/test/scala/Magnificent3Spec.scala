@@ -9,23 +9,27 @@ object Magnificent3Spec {
 
   final case class Wrapper[T](value: T)
 
+  def extractGeneric[M[_], T <: HList, V](t: T)(
+      implicit select: GenericSelector[M, T, V]): M[V] = {
+    select.apply(t)
+  }
+
 }
 
 final class Magnificent3Spec extends FreeSpec {
 
   "GenericSelector" - {
-    val wrapperSelector = GenericSelector[Wrapper]
 
     "Extracts head" in {
       val wrapper = Wrapper("Hello")
-      val directlyInferredResult = wrapperSelector(wrapper :: HNil)
+      val directlyInferredResult = extractGeneric(wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
 
     "Extracts it as a second item" in {
       val wrapper = Wrapper("Hello")
-      val directlyInferredResult = wrapperSelector(1 :: wrapper :: HNil)
+      val directlyInferredResult = extractGeneric(1 :: wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
@@ -33,7 +37,7 @@ final class Magnificent3Spec extends FreeSpec {
     "Extracts it as a third item" in {
       val wrapper = Wrapper("Hello")
       val directlyInferredResult =
-        wrapperSelector(1 :: "Test" :: wrapper :: HNil)
+        extractGeneric(1 :: "Test" :: wrapper :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
@@ -41,15 +45,15 @@ final class Magnificent3Spec extends FreeSpec {
     "Extracts it as a fourth item" in {
       val wrapper = Wrapper("Hello")
       val directlyInferredResult =
-        wrapperSelector(
+        extractGeneric(
           1 :: "Test" :: 2.toFloat :: wrapper :: "something" :: HNil)
       val ensureTypePreserved: Wrapper[String] = directlyInferredResult
       assert(ensureTypePreserved == wrapper)
     }
 
     "Doesn't extract" in {
-      // this does not compile
-//      val r = wrapperSelector(1 :: HNil)
+//       this does not compile
+//      val r = extractGeneric(1 :: HNil)
     }
 
   }
